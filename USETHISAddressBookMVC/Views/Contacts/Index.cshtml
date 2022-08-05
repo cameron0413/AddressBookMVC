@@ -92,4 +92,17 @@
     </div>
 </div>
 
-@*Scaffolded Code*@
+@section scripts{
+    <script>
+            <!--Sweet Alerts-- >
+            let message = '@(ViewBag.SwalMessage)';
+        if (!message.includes("Error")) {
+            //Sweet alert goes here
+            //make sure there's "backdrop: false" at the top
+        } else {
+            //Sweet alert "oops" goes here.
+            //make sure there's "backdrop: false" at the top
+        }
+
+    </script>
+}

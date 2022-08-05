@@ -37,7 +37,7 @@
                         </td>
                         <td>
                             <a asp-action="Edit" asp-route-id="@category.Id" asp-controller="Categories"><i class="bi bi-pencil-fill"></i></a> |
-                            <a asp-action="Details" asp-route-id="@category.Id" asp-controller="Categories"><i class="bg-info bi-envelop-fill"></i></a> |
+                            <a asp-action="EmailCategory" asp-route-id="@category.Id" asp-controller="Categories"><i class="bg-info bi-envelop-fill"></i></a> |
                             <a asp-action="Delete" asp-route-id="@category.Id" asp-controller="Categories"><i class="bi bi-trash-fill "></i></a>
                         </td>
                     </tr>
@@ -47,4 +47,17 @@
     </div>
 </div>
 
+@section scripts{
+    <script>
+            <!--Sweet Alerts-- >
+            let message = '@(ViewBag.SwalMessage)';
+        if (!message.includes("Error")) {
+            //Sweet alert goes here
+            //make sure there's "backdrop: false" at the top
+        } else {
+            //Sweet alert "oops" goes here.
+            //make sure there's "backdrop: false" at the top
+        }
 
+    </script>
+}

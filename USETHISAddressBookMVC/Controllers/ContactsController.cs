@@ -11,6 +11,7 @@ using USETHISAddressBookMVC.Data;
 using USETHISAddressBookMVC.Enums;
 using USETHISAddressBookMVC.Models;
 using USETHISAddressBookMVC.Services.Interfaces;
+using USETHISAddressBookMVC.Models.ViewModels;
 
 namespace USETHISAddressBookMVC.Controllers
 {
@@ -20,12 +21,13 @@ namespace USETHISAddressBookMVC.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IImageService _imageService;
         private readonly IAddressBookService _addressBookService;
+        private readonly IABEmailService _emailService;
 
         public ContactsController(ApplicationDbContext context,
                                   UserManager<AppUser> userManager,
-                                  IImageService imageService
-,
-                                  IAddressBookService addressBookService
+                                  IImageService imageService,
+                                  IAddressBookService addressBookService,
+                                  IABEmailService emailService,
 
             )
         {
@@ -33,6 +35,7 @@ namespace USETHISAddressBookMVC.Controllers
             _userManager = userManager;
             _imageService = imageService;
             _addressBookService = addressBookService;
+            _emailService = emailService;
             //The underscores just denote that these are PRIVATE variables.
         }
 
@@ -42,8 +45,10 @@ namespace USETHISAddressBookMVC.Controllers
 
         // GET: Contacts
         [Authorize]
-        public async Task<IActionResult> Index(int categoryId)
+        public async Task<IActionResult> Index(int categoryId, string swalMessage = null)
         {
+            ViewData["SwalMessage"] = swalMessage;
+            //What the heck is a viewbag? I still don't get it.
             string appUserId = _userManager.GetUserId(User);
             List<Contact> contacts = new List<Contact>();
 
@@ -58,7 +63,7 @@ namespace USETHISAddressBookMVC.Controllers
                                   .OrderBy(c => c.LastName)
                                   .ThenBy(c => c.FirstName)
                                   .ToList();
-            } 
+            }
             else
             {
                 contacts = appUser.Categories.FirstOrDefault(c => c.Id == categoryId)
@@ -98,7 +103,8 @@ namespace USETHISAddressBookMVC.Controllers
                                    .ToList();
 
 
-            } else
+            }
+            else
             {
                 contacts = appUser!.Contacts
                                   .OrderBy(c => c.LastName)
@@ -319,6 +325,54 @@ namespace USETHISAddressBookMVC.Controllers
         private bool ContactExists(int id)
         {
             return (_context.Contact?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        [Authorize]
+        public async Task<IActionResult> EmailContact(int id)
+        {
+            string appUserId = _userManager.GetUserId(User);
+            Contact contact = await _context.Contact.Where(c => c.Id == id && c.AppUserId == appUserId)
+                                                    .FirstOrDefaultAsync();
+
+            if (contact == null)
+            {
+                return NotFound();
+            }
+
+            EmailData emailData = new EmailData()
+            {
+                EmailAddress = contact.Email,
+                FirstName = contact.FirstName,
+                LastName = contact.LastName,
+
+            };
+
+            EmailContactViewModel model = new EmailContactViewModel()
+            {
+                Contact = contact,
+                EmailData = EmailData
+            };
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> EmailContact(EmailContactViewModel ecvm)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _emailService.SendEmailAsync(ecvm.EmailData.EmailAddress, ecvm.EmailData.Subject, ecvm.EmailData.Body);
+                    return RedirectToAction("Index", "Contacts", new { swalMessage = "Success: Email Sent!" });
+                }
+                catch
+                {
+                    return RedirectToAction("Index", "Contacts", new { swalMessage = "Error: Email Send Failed!" });
+                    throw;
+                }
+            }
+            return View(ecvm);
         }
     }
 }
