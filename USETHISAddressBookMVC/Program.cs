@@ -4,11 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using USETHISAddressBookMVC.Data;
 using USETHISAddressBookMVC.Services.Interfaces;
 using USETHISAddressBookMVC.Services;
+using USETHISAddressBookMVC.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = ConnectionHelper.GetConnectionString(builder.Configuration);
+
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
