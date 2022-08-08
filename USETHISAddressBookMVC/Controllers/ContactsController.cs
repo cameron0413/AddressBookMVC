@@ -94,7 +94,7 @@ namespace USETHISAddressBookMVC.Controllers
 
 
 
-            if (String.IsNullOrEmpty(searchString))
+            if (String.IsNullOrEmpty(searchString)) 
             {
                 
                 contacts = appUser!.Contacts
