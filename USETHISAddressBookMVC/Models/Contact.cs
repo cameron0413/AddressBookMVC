@@ -62,6 +62,7 @@ namespace USETHISAddressBookMVC.Models
         public IFormFile? ImageFile { get; set; }
         public virtual AppUser? AppUser { get; set; }
         public virtual ICollection<Category> Categories { get; set; } = new HashSet<Category>();
+        //Join table ^ created CategoryContact table on Postgres
 
 
 

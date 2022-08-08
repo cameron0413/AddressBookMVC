@@ -1,8 +1,5 @@
 ﻿@model USETHISAddressBookMVC.Models.Category
 
-@{
-    ViewData["Title"] = "Edit";
-}
 
 <h1>Edit</h1>
 
@@ -13,11 +10,7 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="AppUserId" class="control-label"></label>
-                <input type="hidden" asp-for="Id" />
-                <input type="hidden" asp-for="AppUserId" />
-            </div>
+            <input type="hidden" asp-for="AppUserId" />
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />

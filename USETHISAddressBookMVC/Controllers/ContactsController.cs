@@ -27,7 +27,7 @@ namespace USETHISAddressBookMVC.Controllers
                                   UserManager<AppUser> userManager,
                                   IImageService imageService,
                                   IAddressBookService addressBookService,
-                                  IABEmailService emailService,
+                                  IABEmailService emailService
 
             )
         {
@@ -78,7 +78,7 @@ namespace USETHISAddressBookMVC.Controllers
         }
 
 
-
+        //Search for contacts
         [Authorize]
         public async Task<IActionResult> Search(string searchString)
         {
@@ -96,20 +96,20 @@ namespace USETHISAddressBookMVC.Controllers
 
             if (String.IsNullOrEmpty(searchString))
             {
-                contacts = (List<Contact>)_context.Contact
-                                   .Where(c => c.FullName!.ToLower().Contains(searchString.ToLower()))
-                                   .OrderBy(c => c.LastName)
-                                   .ThenBy(c => c.FirstName)f
-                                   .ToList();
-
+                
+                contacts = appUser!.Contacts
+                                  .OrderBy(c => c.LastName)
+                                  .ThenBy(c => c.FirstName)
+                                  .ToList();
 
             }
             else
             {
                 contacts = appUser!.Contacts
-                                  .OrderBy(c => c.LastName)
-                                  .ThenBy(c => c.FirstName)
-                                  .ToList();
+                                   .Where(c => c.FullName!.ToLower().Contains(searchString.ToLower()))
+                                   .OrderBy(c => c.LastName)
+                                   .ThenBy(c => c.FirstName)
+                                   .ToList();
             }
 
             ViewData["CategoryId"] = new SelectList(appUser.Categories, "Id", "Name");
@@ -128,34 +128,27 @@ namespace USETHISAddressBookMVC.Controllers
 
         // GET: Contacts/Create
         [Authorize]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id");
+            string appUserId = _userManager.GetUserId(User);
+            ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States)).Cast<States>().ToList());
+            ViewData["CategoryList"] = new MultiSelectList(await _addressBookService.GetUserCategoriesAsync(appUserId), "Id", "Name");
             return View();
         }
 
-        // POST: Contacts/Create
-
-        //Ask Bobby for this code!!
-
-
-
-
-
-
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //POST: Contacts/Create
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AppUserId,FirstName,LastName,BirthDate,Address1,City,State,ZipCode,Email,PhoneNumber,Created,ImageData,ImageType")] Contact contact, List<int> CategoryList)
+        public async Task<IActionResult> Create([Bind("Id,AppUserId,FirstName,LastName,BirthDate,Address1,City,State,ZipCode,Email,PhoneNumber,Created,ImageFile,ImageData,ImageType")] Contact contact, List<int> CategoryList)
         {
+            ModelState.Remove("AppUserId");
+
             if (ModelState.IsValid)
             {
-                _context.Add(contact);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-
+                contact.AppUserId = _userManager.GetUserId(User);
+                contact.Created = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+                
                 if (contact.BirthDate != null)
                 {
                     contact.BirthDate = DateTime.SpecifyKind(contact.BirthDate.Value, DateTimeKind.Utc);
@@ -178,8 +171,8 @@ namespace USETHISAddressBookMVC.Controllers
 
                 }
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contact.AppUserId);
-            return View(contact);
+            
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Contacts/Edit/5
@@ -214,7 +207,7 @@ namespace USETHISAddressBookMVC.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,AppUserId,FirstName,LastName,BirthDate,Address1,City,State,ZipCode,Email,PhoneNumber,Created,ImageData,ImageType")] Contact contact, List<int> CategoryList)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,AppUserId,FirstName,LastName,BirthDate,Address1,City,State,ZipCode,Email,PhoneNumber,Created,ImageFile,ImageData,ImageType")] Contact contact, List<int> CategoryList)
         {
             if (id != contact.Id)
             {
@@ -230,7 +223,7 @@ namespace USETHISAddressBookMVC.Controllers
 
                     if (contact.BirthDate != null)
                     {
-                        contact.BirthDate = DateTime.SpecifyKind(contact.BirthDate, DateTimeKind.Utc);
+                        contact.BirthDate = DateTime.SpecifyKind(contact.BirthDate.Value, DateTimeKind.Utc);
                     }
 
                     if (contact.ImageFile != null)
@@ -350,7 +343,7 @@ namespace USETHISAddressBookMVC.Controllers
             EmailContactViewModel model = new EmailContactViewModel()
             {
                 Contact = contact,
-                EmailData = EmailData
+                EmailData = emailData
             };
             return View(model);
         }

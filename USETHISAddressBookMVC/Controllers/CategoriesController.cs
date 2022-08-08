@@ -22,7 +22,7 @@ namespace USETHISAddressBookMVC.Controllers
 
         public CategoriesController(ApplicationDbContext context,
                                     UserManager<AppUser> userManager,
-                                    IAddressBookService emailService)
+                                    IABEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
@@ -90,7 +90,7 @@ namespace USETHISAddressBookMVC.Controllers
 
             string appUserId = _userManager.GetUserId(User);
 
-            var category = _context.Category
+            var category = await _context.Category
                                    .Where(c => c.Id == id && c.AppUserId == appUserId)
                                    .FirstOrDefaultAsync();
 
@@ -219,7 +219,7 @@ namespace USETHISAddressBookMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                AppUser appUser = await _userManager.GetUserIdAsync(User);
+               //appUserId line deleted
                 string htmlMessage = ecvm.EmailData.Body;
                 await _emailService.SendEmailAsync(ecvm.EmailData.EmailAddress, ecvm.EmailData.Subject, htmlMessage);
 

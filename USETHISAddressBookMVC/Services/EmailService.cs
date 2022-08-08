@@ -29,9 +29,9 @@ namespace USETHISAddressBookMVC.Services
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            var emailSender = _mailSettings.Email;
+           // var emailSender = _mailSettings.Email;
 
-            EnvironmentVariablesExtensions emailSender = _mailSettings.Email ?? Environment.GetEnvironmentVariable("Email");
+            var emailSender = _mailSettings.Email ?? Environment.GetEnvironmentVariable("Email");
 
             MimeMessage newEmail = new();
             newEmail.Sender = MailboxAddress.Parse(emailSender);

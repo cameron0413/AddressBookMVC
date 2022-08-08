@@ -16,14 +16,26 @@ namespace USETHISAddressBookMVC.Services
             _context = context;
         }
 
-        public Task AddContactToCategoryAsync(int categoryId, int contactId)
+        public async Task AddContactToCategoryAsync(int categoryId, int contactId)
         {
-            throw new NotImplementedException();
+            if (!await IsContactInCategory(categoryId, contactId))
+            {
+                Contact? contact = await _context.Contact.FindAsync(contactId);
+                Category? category = await _context.Category.FindAsync(categoryId);
+                if (category != null && contact != null)
+                {
+                    category.Contacts.Add(contact);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
         }
 
-        public Task<IEnumerable<Category>> GetContactCategoriesAsync(string appUserId)
+        public async Task<IEnumerable<Category>> GetContactCategoriesAsync(int contactId)
         {
-            throw new NotImplementedException();
+            Contact? contact = await _context.Contact.Include(c => c.Categories).FirstOrDefaultAsync(c => c.Id == contactId);
+
+            return contact.Categories;
         }
 
         public async Task<IEnumerable<Category>> GetUserCategoriesAsync(string appUserId)
@@ -66,9 +78,10 @@ namespace USETHISAddressBookMVC.Services
             return contacts;
         }
 
-        public Task<bool> IsContactInCategory(int categoryId, int contactId)
+        public async Task<bool> IsContactInCategory(int categoryId, int contactId)
         {
-            
+            Contact? contact = await _context.Contact.FindAsync(contactId);
+            return await _context.Category.Include(c => c.Contacts).Where(c => c.Id == categoryId && c.Contacts.Contains(contact)).AnyAsync();
         }
 
         public async Task RemoveContactFromCategoryAsync(int categoryId, int contactId)
@@ -83,9 +96,26 @@ namespace USETHISAddressBookMVC.Services
             }
         }
 
-        public IEnumerable<Contact> SearchForContacts(string searchString, string appUserId)
+        public async Task<IEnumerable<Contact>> SearchForContacts(string searchString, string appUserId)
         {
-            
+            searchString = searchString.ToLower();
+            List<Contact> contacts = new List<Contact>();
+            if (string.IsNullOrEmpty(searchString))
+            {
+                contacts = await _context.Contact.Where(c => c.AppUserId == appUserId).ToListAsync();
+            }
+            else
+            {
+                contacts = _context.Contact.Where(c => c.AppUserId == appUserId && c.FullName.ToLower().Contains(searchString))
+                                           .OrderBy(c => c.LastName)
+                                           .ThenBy(c => c.FirstName)
+                                           .ToList();
+
+
+                
+
+            }
+            return contacts;
         }
 
         async Task<IEnumerable<int>> IAddressBookService.GetContactCategoryIdsAsync(int contactId)
@@ -95,6 +125,7 @@ namespace USETHISAddressBookMVC.Services
                 Contact contact = await _context.Contact
                                                 .Include(c => c.Categories)
                                                 .FirstOrDefaultAsync(c => c.Id == contactId);
+
                 List<int> categoryIds = contact.Categories.Select(c => c.Id).ToList();
                 return categoryIds;
             }

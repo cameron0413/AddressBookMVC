@@ -7,10 +7,10 @@ namespace USETHISAddressBookMVC.Services
 
         #region Globals
         private readonly string[] suffixes = { "Bytes", "KB", "MB", "GB", "TB", "PB" };
-        private readonly string defaultImageSrc = "img/ContactImages/DefaultContactImage.png";
+        private readonly string defaultImageSrc = "/img/DefaultContactImage.png";
         #endregion
 
-        public string? ConvertByteArrayToFile(byte[] fileData, string? extension)
+        public string? ConvertByteArrayToFile(byte[]? fileData, string? extension)
         {
             if (fileData == null)
             {

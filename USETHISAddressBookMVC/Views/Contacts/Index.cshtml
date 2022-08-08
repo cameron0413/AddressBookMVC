@@ -1,4 +1,6 @@
 ﻿@model IEnumerable<USETHISAddressBookMVC.Models.Contact>
+@using USETHISAddressBookMVC.Services.Interfaces;
+@inject IImageService ImageService
 
 @{
     ViewData["Title"] = "Index";
@@ -24,11 +26,11 @@
                 <input type="submit" class="btn btn-outline-primary" value="Search" />
             </div>
         </form>
-        <form>
+        <form asp-action="Index" asp-controller="Contacts">
             <div class="mt-5">
                 <label class="form-label fw-bold">CATEGORY FILTER</label>
 
-                <select name="id" asp-items="@ViewBag.CategoryId" class="form-control"
+                <select name="categoryId" asp-items="@ViewBag.CategoryId" class="form-control"
                         onchange="this.form.submit()" onfocus="this.selectedIndex=-1;this.blur();">
                     <option>All Contacts</option>
                 </select>
@@ -58,7 +60,7 @@
                             <div class="card mb-3">
                                 <div class="row g-0">
                                     <div class="col-md-4 square-img-container">
-                                        <img src="" class="square-img rounded-start" alt="...">
+                                        <img src="@ImageService.ConvertByteArrayToFile(contact.ImageData!, contact.ImageType!)" class="square-img rounded-start" alt="...">
                                     </div>
                                     <div class="col-md-8">
                                         <div class="card-body">
@@ -76,7 +78,7 @@
                                             <div class="fs-4">
 
                                                 <a class="me-3 editIcons" asp-action="Edit" asp-route-id="@contact.Id"><i class="bi bi-pencil-fill "></i></a>
-                                                <a class="me-3 editIcons" asp-action="Details" asp-route-id="@contact.Id"><i class="bi bi-envelope-fill "></i></a>
+                                                <a class="me-3 editIcons" asp-action="EmailContact" asp-route-id="@contact.Id"><i class="bi bi-envelope-fill "></i></a>
                                                 <a class="me-3 editIcons" asp-action="Delete" asp-route-id="@contact.Id"><i class="bi bi-trash-fill text-danger "></i></a>
                                             </div>
                                         </div>

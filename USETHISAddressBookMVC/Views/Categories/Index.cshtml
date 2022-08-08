@@ -9,7 +9,7 @@
 
 <div class="row">
     <div class="col-12 text-end mb-2">
-        <a class="btn btn-primary rounded-pill" href="/categorydetail.html">Create New</a>
+        <a class="btn btn-primary rounded-pill" asp-controller="Categories" asp-action="Create">Create New</a>
     </div>
 </div>
 
@@ -58,6 +58,23 @@
             //Sweet alert "oops" goes here.
             //make sure there's "backdrop: false" at the top
         }
+
+        //Sweet alert thing
+        //if (!message.includes("Error") && message != '') {
+        //    Swal.fire({
+        //        icon: 'success',
+        //        title: message,
+        //        showConfirmButton: true
+        //    })
+        //} else if (message.includes("Error")) {
+        //    Swal.fire({
+        //        icon: 'error',
+        //        title: 'Oops...',
+        //        text: message
+        //    })
+        //}
+
+
 
     </script>
 }
