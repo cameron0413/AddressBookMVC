@@ -31,6 +31,8 @@ namespace USETHISAddressBookMVC.Services
 
         }
 
+        //Homework 8/11/22 - Get a comments form going
+
         public async Task<IEnumerable<Category>> GetContactCategoriesAsync(int contactId)
         {
             Contact? contact = await _context.Contact.Include(c => c.Categories).FirstOrDefaultAsync(c => c.Id == contactId);
